@@ -6,7 +6,7 @@ Matlab code for working with canonical tensor decompositions.
 
 This software requires the Sandia Tensor Toolbox. To download this toolbox go to:
 
-http://www.sandia.gov/~tgkolda/TensorToolbox/index-2.5.html
+http://www.sandia.gov/~tgkolda/TensorToolbox
 
 Steps to run this software:
 
