@@ -93,12 +93,11 @@ function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)
     end  
     
     % extra info for analysis
-    ext = [];
-    %ext.Bnorm = [];
-    %ext.ls_cond = [];    
-    %ext.lambda_l1 = [];
-    %ext.nsig_svals = [];
-    %ext.rank_iter = [];
+    ext.Bnorm = [];
+    ext.ls_cond = [];    
+    ext.lambda_l1 = [];
+    ext.nsig_svals = [];
+    ext.rank_iter = [];
     
     % Main iteration
     err = zeros(1,rmax-r0+1);
@@ -106,6 +105,9 @@ function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)
         
         % if you haven't converged and rnk equals rank of A, exit.
         if (r0<rmax) && (rnk==length(A.lambda))
+            % Message added by MR
+            fprintf('Rank of reduction = rank of original matrix.\n')
+            fprintf('Returning original matrix!\n')
             B = A;
             return
         end
@@ -125,6 +127,7 @@ function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)
             'dimorder',dimorder,'Anorm',Anorm,'errtype',errtype);
         err(iter) = err_r(end);
         
+        
         % check for convergence
         if err(iter)<tol
             err = err(1:iter);
@@ -137,10 +140,12 @@ function [B,err,Anorm,ext] = als(A,tol,stucktol,delta,r0,rmax,varargin)
                 fprintf('***als.m: No tensor of rank rmax')
                 fprintf(' found for desired accuracy.\n')
             end
+            
             return
         end
         
     end
+
 end
 
 function A=rankup(A)
@@ -152,10 +157,16 @@ function A=rankup(A)
     for d=1:D
         B{d}=randn(size(A.U{d},1),1);
     end
+    
+    % Normalize the contributing term
     B = ktensor(1,B);
-    B.lambda = mean(abs(A.lambda));
+    B = normalize(B);
+    
+    % Set the norm to be similar to the tensor A
+    % Note, I made the guess an order of magnitude smaller than the
+    % smallest s-values because we hope for a fast decay in s-values -MR 
+    B.lambda = min(abs(A.lambda))/10;
     
     A = A+B;
     A = arrange(A);
-    
 end

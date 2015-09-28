@@ -43,17 +43,23 @@ function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)
 
     % initial guess
     if isempty(B)
+        
         % if no initial guess provided, use a random sparse one
         B=cell(1,D);
         for d=1:D
             B{d} = sprandn(size(A,d),rnk,density);
         end
+        
+        % normalize the initial guess
+        B = ktensor(1,B);
+        B = normalize(B);
+        B = B.U;
     else
         Bk = B;
         B = B.U;
         rnk = length(Bk.lambda);
     end
-    
+        
     % residual error vector
     err = zeros(1,maxit);
     
@@ -74,12 +80,12 @@ function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)
                 Y = Y .* (B{d}'*B{d});
             end
             
-            % regularize
+            % regularize, alpha just larger than eps...
             Y = full(Y) + 1e-10 * eye(rnk);
             
             % compute pseudo-inverse
-            [UY,DY,VY] = svd(Y);
-            irng = find((abs(diag(DY)))>(DY(1,1)*eps));
+            [UY,DY,VY] = svd(full(Y));
+            irng = find((diag(DY))>(DY(1,1)*1e-10)); % I'm not sure this is needed
             VY = VY(:,irng);
             UY = UY(:,irng);
             DY = DY(irng,irng);
@@ -94,9 +100,6 @@ function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)
             % normalize
             lambda = sqrt(abs(sum(Z.^2,1)))';
             Z = Z * spdiags(1./lambda,0,rnk,rnk);
-            
-            %fprintf(' max lambda = %e, min lambda = %e\n', full(max(lambda)),...
-            %   full(min(lambda)))
 
             % update
             B{k} = Z;
@@ -112,6 +115,8 @@ function [Bk,err,Anorm,ext] = alsi(A,rnk,tol,stucktol,delta,ext,varargin)
             end
             
         end
+        
+
         
         % truncate small elements by sparsity factor
         Bk = trncel(Bk,delta);

@@ -1,7 +1,7 @@
 clear all;  close all;  clc;
 
-addpath ~/myProjects/rproj/codes/tensor_toolbox_2.5/   % sandia tensor toolbox
-addpath ~/myProjects/rproj/codes/ctd/                % my library
+addpath ~/myCode/src/tensor_toolbox_2.5/   % sandia tensor toolbox
+addpath ~/myCode/repos/ctd/                % my library
 
 test_paths;   if ~ok; return;  end;
 test_norms;   if ~ok; return;  end;
@@ -15,6 +15,6 @@ test_k;    if ~ok;  return;  end;
 test_krand;    if ~ok;  return;  end;
 test_vvpwm;    if ~ok;  return;  end;
 test_mvm;   if ~ok; return;  end;
-test_mmm;   if ~ok;  return; end;
-test_als;   if ~ok;  return; end;
+%test_mmm;   if ~ok;  return; end;
+%test_als;   if ~ok;  return; end;
 test_tenid;  if ~ok;  return;  end;
